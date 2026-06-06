@@ -98,6 +98,25 @@ curl -s http://localhost:8000/chat \
   -d '{"messages":[{"role":"user","content":"i keep procrastinating instead of studying"}]}'
 ```
 
+## Activity logger
+
+Krish "sees" what you're working on via a small local logger that samples the
+focused window every 15 seconds and records contiguous stretches of app usage.
+
+```bash
+python scripts/activity_logger.py
+```
+
+It runs **100% locally** and stores nothing off your machine — samples go
+straight into the local SQLite db (`data/krish.db`), and the finished rows are
+served back over `GET /logs`. It needs an **X11 session** and the command-line
+tools `xdotool`, `xprop` and `xprintidle` (it prints the `apt install` line if
+any are missing). Check your session type with:
+
+```bash
+echo $XDG_SESSION_TYPE   # should print: x11
+```
+
 ## Roadmap — build phases
 
 - **Phase 0 — Scaffold** *(done)*: repo structure, venv, dependencies, env config.

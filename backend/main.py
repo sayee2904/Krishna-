@@ -70,3 +70,8 @@ def history(limit: int = 20):
 def log_endpoint(request: LogRequest):
     db.save_log(request.activity, app=request.app, seconds=request.seconds)
     return {"status": "ok"}
+
+
+@app.get("/logs")
+def logs(limit: int = 50):
+    return {"logs": db.recent_logs(limit=limit)}

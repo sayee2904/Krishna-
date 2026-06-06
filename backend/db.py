@@ -79,6 +79,16 @@ def save_log(activity: str, app: str | None = None, seconds: int | None = None) 
         )
 
 
+def recent_logs(limit: int = 50) -> list[dict]:
+    """Return the most recent activity logs in chronological (oldest-first) order."""
+    with _connect() as conn:
+        rows = conn.execute(
+            "SELECT id, activity, app, seconds, ts FROM logs ORDER BY id DESC LIMIT ?",
+            (limit,),
+        ).fetchall()
+    return [dict(r) for r in reversed(rows)]
+
+
 def get_logs(since: str | None = None) -> list[dict]:
     """Return activity logs, optionally only those with ts >= `since` (ISO string)."""
     with _connect() as conn:
