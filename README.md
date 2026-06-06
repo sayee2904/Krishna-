@@ -78,6 +78,26 @@ cp .env.example .env        # then edit if needed
 ollama pull qwen2.5:3b
 ```
 
+## Running the backend
+
+Make sure Ollama is running and the model is pulled, then start the API:
+
+```bash
+uvicorn backend.main:app --reload
+```
+
+The server comes up on `http://localhost:8000`. Quick checks:
+
+```bash
+# health
+curl http://localhost:8000/health
+
+# chat with Krish
+curl -s http://localhost:8000/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"messages":[{"role":"user","content":"i keep procrastinating instead of studying"}]}'
+```
+
 ## Roadmap — build phases
 
 - **Phase 0 — Scaffold** *(done)*: repo structure, venv, dependencies, env config.
