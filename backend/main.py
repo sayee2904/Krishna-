@@ -4,9 +4,9 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from backend import db
-from backend.config import OLLAMA_MODEL
+from backend.config import OLLAMA_MODEL, USER_NAME
 from backend.llm import chat
-from backend.persona import KRISHNA_SYSTEM
+from backend.persona import build_system_prompt
 
 app = FastAPI(title="krish backend")
 
@@ -43,7 +43,8 @@ def chat_endpoint(request: ChatRequest):
     history = db.recent_messages(limit=20)
     messages = [{"role": m["role"], "content": m["content"]} for m in history]
 
-    reply = chat(messages, system=KRISHNA_SYSTEM)
+    system = build_system_prompt(user_name=USER_NAME)
+    reply = chat(messages, system=system)
     db.save_message("assistant", reply)
     return {"reply": reply}
 

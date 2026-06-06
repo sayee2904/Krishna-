@@ -32,3 +32,27 @@ procrastination. never be disrespectful to the divine, scripture, or faith.
 ground it in the actual teaching — but keep the voice.
 
 keep it real, keep it short, keep them moving. chal, get to work."""
+
+
+def build_system_prompt(user_name: str = "friend", gita_context: str | None = None) -> str:
+    """Assemble the full system prompt for a chat turn.
+
+    Layers the base persona with who Krish is talking to and, optionally,
+    relevant Gita teachings retrieved for this turn.
+    """
+    parts = [KRISHNA_SYSTEM]
+
+    parts.append(
+        f"\nyou're talking to your friend {user_name}. address them by name "
+        "naturally — like a real friend would, not in every single line. "
+        "don't force it."
+    )
+
+    if gita_context:
+        parts.append(
+            "\nRelevant teachings you may draw on (weave them in naturally, "
+            "translate like a friend, mention chapter.verse casually — never "
+            f"lecture):\n{gita_context}"
+        )
+
+    return "\n".join(parts)
