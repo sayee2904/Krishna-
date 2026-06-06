@@ -43,6 +43,9 @@ pnpm-debug.log*
 dist/
 .cache/
 
+# ---- Database ----
+data/*.db
+
 # ---- Models / vector store / fine-tune artifacts ----
 *.gguf
 chroma_db/

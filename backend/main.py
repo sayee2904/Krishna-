@@ -3,6 +3,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+from backend import db
 from backend.config import OLLAMA_MODEL
 from backend.llm import chat
 from backend.persona import KRISHNA_SYSTEM
@@ -19,6 +20,12 @@ class ChatRequest(BaseModel):
     messages: list[Message]
 
 
+class LogRequest(BaseModel):
+    activity: str
+    app: str | None = None
+    seconds: int | None = None
+
+
 @app.get("/health")
 def health():
     return {"status": "ok", "model": OLLAMA_MODEL}
@@ -26,6 +33,27 @@ def health():
 
 @app.post("/chat")
 def chat_endpoint(request: ChatRequest):
-    messages = [m.model_dump() for m in request.messages]
+    # The latest user turn is whatever the client just sent.
+    if request.messages:
+        latest = request.messages[-1]
+        db.save_message(latest.role, latest.content)
+
+    # Build context from persisted history, not just this request — so Krish
+    # remembers across separate calls.
+    history = db.recent_messages(limit=20)
+    messages = [{"role": m["role"], "content": m["content"]} for m in history]
+
     reply = chat(messages, system=KRISHNA_SYSTEM)
+    db.save_message("assistant", reply)
     return {"reply": reply}
+
+
+@app.get("/history")
+def history(limit: int = 20):
+    return {"messages": db.recent_messages(limit=limit)}
+
+
+@app.post("/log")
+def log_endpoint(request: LogRequest):
+    db.save_log(request.activity, app=request.app, seconds=request.seconds)
+    return {"status": "ok"}
