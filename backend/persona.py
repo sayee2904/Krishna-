@@ -49,10 +49,13 @@ def build_system_prompt(user_name: str = "friend", gita_context: str | None = No
     )
 
     if gita_context:
-        parts.append(
-            "\nRelevant teachings you may draw on (weave them in naturally, "
-            "translate like a friend, mention chapter.verse casually — never "
-            f"lecture):\n{gita_context}"
+        instructions = (
+            "Relevant teachings you may draw on (weave them in naturally, "
+            "translate like a friend, never lecture). when one fits, name the "
+            "chapter.verse casually like you're quoting your own favorite line "
+            '— e.g. "there\'s a line i love, gita 2.47 —" or "2.40 vibes:". '
+            "drop the number, keep it chill:"
         )
+        parts.append(f"\n{instructions}\n{gita_context}")
 
     return "\n".join(parts)
