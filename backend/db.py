@@ -89,19 +89,19 @@ def recent_logs(limit: int = 50) -> list[dict]:
     return [dict(r) for r in reversed(rows)]
 
 
-def get_logs(since: str | None = None) -> list[dict]:
-    """Return activity logs, optionally only those with ts >= `since` (ISO string)."""
+def logs_since(ts: str) -> list[dict]:
+    """Return activity logs with ts >= `ts`, oldest-first.
+
+    `ts` is an ISO-8601 UTC string (same format save_log writes). Because the
+    stored timestamps are all UTC with the same offset suffix, a lexicographic
+    `>=` comparison orders them correctly — good enough for day / minute ranges.
+    """
     with _connect() as conn:
-        if since is None:
-            rows = conn.execute(
-                "SELECT id, activity, app, seconds, ts FROM logs ORDER BY id"
-            ).fetchall()
-        else:
-            rows = conn.execute(
-                "SELECT id, activity, app, seconds, ts FROM logs "
-                "WHERE ts >= ? ORDER BY id",
-                (since,),
-            ).fetchall()
+        rows = conn.execute(
+            "SELECT id, activity, app, seconds, ts FROM logs "
+            "WHERE ts >= ? ORDER BY id",
+            (ts,),
+        ).fetchall()
     return [dict(r) for r in rows]
 
 
