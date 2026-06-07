@@ -61,3 +61,6 @@ Thumbs.db
 
 # ---- Claude Code local settings ----
 .claude/settings.local.json
+
+finetune/outputs/
+unsloth_compiled_cache/
