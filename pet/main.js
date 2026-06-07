@@ -2,17 +2,22 @@
 //
 // A small frameless, transparent, always-on-top, skip-taskbar window pinned to
 // the bottom-right corner. The window ignores mouse events by default (clicks
-// fall through to the desktop); the renderer raycasts the 3D figure and toggles
-// that off while the cursor is over the character so it can be dragged/clicked.
+// fall through to the desktop); the renderer raycasts the character and toggles
+// that off while the cursor is over it so it can be dragged/clicked.
 //
 // Target: Ubuntu X11, where transparent + always-on-top + click-through work.
 
 const path = require('path');
 const { app, BrowserWindow, Tray, Menu, ipcMain, screen, nativeImage } = require('electron');
 
-const WIN_W = 240;
-const WIN_H = 300;
+// Smaller than the first skeleton — the character should read as a little pet.
+const WIN_W = 180;
+const WIN_H = 210;
 const MARGIN = 24; // gap from the screen edge
+
+// Canonical mood list, shared by the tray submenu and the renderer hotkeys
+// (number keys 1-6 map to these in order).
+const MOODS = ['idle', 'watching', 'happy', 'flute', 'sleeping', 'angry'];
 
 let win = null;
 let tray = null;
@@ -22,7 +27,7 @@ let tray = null;
 let dragOrigin = null; // { winX, winY, mouseX, mouseY }
 
 function bottomRightPosition() {
-  // workAreaSize excludes panels/docks, so we sit above the taskbar.
+  // workArea excludes panels/docks, so we sit above the taskbar.
   const { workArea } = screen.getPrimaryDisplay();
   return {
     x: workArea.x + workArea.width - WIN_W - MARGIN,
@@ -49,8 +54,10 @@ function createWindow() {
     focusable: true,
     fullscreenable: false,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: false,
     },
   });
 
@@ -65,13 +72,14 @@ function createWindow() {
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
 }
 
+function sendMood(mood) {
+  if (win && !win.webContents.isDestroyed()) win.webContents.send('set-mood', mood);
+}
+
 function createTray() {
   const iconPath = path.join(__dirname, 'assets', 'icon.png');
   let image = nativeImage.createFromPath(iconPath);
-  if (image.isEmpty()) {
-    // Fallback so the app still runs if the icon asset is missing.
-    image = nativeImage.createEmpty();
-  }
+  if (image.isEmpty()) image = nativeImage.createEmpty(); // run even if icon missing
   tray = new Tray(image);
   tray.setToolTip('Krish — desktop pet');
 
@@ -84,12 +92,18 @@ function createTray() {
         else win.show();
       },
     },
+    {
+      label: 'Mood',
+      submenu: MOODS.map((mood) => ({
+        label: mood.charAt(0).toUpperCase() + mood.slice(1),
+        click: () => sendMood(mood),
+      })),
+    },
     { type: 'separator' },
     { label: 'Quit', click: () => app.quit() },
   ]);
   tray.setContextMenu(menu);
 
-  // Left-click the tray icon also toggles visibility.
   tray.on('click', () => {
     if (!win) return;
     if (win.isVisible()) win.hide();

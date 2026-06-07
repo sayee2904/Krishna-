@@ -2,3 +2,7 @@ node_modules/
 npm-debug.log*
 dist/
 .DS_Store
+
+# 3D models: small stylized GLBs are fine to commit (e.g. assets/krishna.glb).
+# If a model gets large (>~50MB), ignore it here so it doesn't bloat the repo:
+# assets/*.glb
