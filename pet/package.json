@@ -1,0 +1,18 @@
+{
+  "name": "krish-pet",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Krish 3D desktop pet — Electron + Three.js placeholder skeleton",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "genicon": "node genicon.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "three": "^0.184.0"
+  },
+  "devDependencies": {
+    "electron": "^28.3.3"
+  }
+}
